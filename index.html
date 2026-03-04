@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prometheus — Music Intelligence Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --accent: #c8a96e;
+    --accent2: #7eb8c8;
+    --accent3: #c87e9a;
+    --text: #e8e4dc;
+    --muted: #6b6878;
+    --code: #1a1a28;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* Navigation */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.2rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    cursor: pointer;
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8rem 2rem 4rem;
+    position: relative;
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero h1 {
+    font-size: clamp(3.5rem, 10vw, 8rem);
+    font-weight: 300;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 540px;
+    font-weight: 300;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+    margin-bottom: 3rem;
+  }
+
+  .scroll-hint {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 0.8s 1s forwards;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .scroll-hint::after {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--muted), transparent);
+    animation: scrollLine 2s infinite;
+  }
+
+  /* Sections */
+  section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+  }
+
+  .section-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin-bottom: 2rem;
+  }
+
+  h2 em { font-style: italic; color: var(--accent); }
+
+  h3 {
+    font-size: 1.4rem;
+    font-weight: 400;
+    margin: 2.5rem 0 0.8rem;
+    color: var(--accent2);
+  }
+
+  p { margin-bottom: 1.2rem; color: #c8c4bc; font-weight: 300; }
+
+  .lead {
+    font-size: 1.3rem;
+    font-weight: 300;
+    color: var(--text);
+    margin-bottom: 2rem;
+    border-left: 2px solid var(--accent);
+    padding-left: 1.5rem;
+  }
+
+  /* Divider */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+    margin: 0 auto;
+  }
+
+  /* Concept cards */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin: 2.5rem 0;
+  }
+
+  .concept-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 2rem;
+    position: relative;
+    transition: border-color 0.3s, transform 0.3s;
+    cursor: default;
+  }
+
+  .concept-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+  }
+
+  .concept-card .icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .concept-card h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+  }
+
+  .concept-card p {
+    font-size: 0.95rem;
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* Piano keyboard visual */
+  .piano-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 2.5rem;
+    margin: 2.5rem 0;
+    text-align: center;
+  }
+
+  .piano {
+    display: inline-flex;
+    position: relative;
+    height: 100px;
+    gap: 2px;
+    margin-bottom: 1.5rem;
+  }
+
+  .key-w {
+    width: 32px;
+    height: 100px;
+    background: #f0ece4;
+    border: 1px solid #ccc;
+    border-radius: 0 0 4px 4px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .key-w:hover, .key-w.active { background: var(--accent); }
+
+  .key-b {
+    width: 22px;
+    height: 62px;
+    background: #1a1a1a;
+    border-radius: 0 0 3px 3px;
+    position: absolute;
+    top: 0;
+    z-index: 2;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .key-b:hover, .key-b.active { background: var(--accent); }
+
+  .piano-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+  }
+
+  /* Chord visualizer */
+  .chord-demo {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 2rem;
+    margin: 2rem 0;
+  }
+
+  .chord-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+
+  .chord-tab {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    padding: 0.7rem 1.2rem;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .chord-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .chord-content { display: none; }
+  .chord-content.active { display: block; }
+
+  .chord-row {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .chord-row:last-child { border-bottom: none; }
+
+  .chord-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    color: var(--text);
+    min-width: 80px;
+  }
+
+  .chord-notes {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+
+  .note-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 2px;
+    background: var(--code);
+    border: 1px solid var(--border);
+    color: var(--accent2);
+  }
+
+  .chord-desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    min-width: 160px;
+    text-align: right;
+  }
+
+  /* Beat grid visual */
+  .beat-grid {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 2rem;
+    margin: 2rem 0;
+    overflow-x: auto;
+  }
+
+  .beat-row {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .beat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    width: 60px;
+    flex-shrink: 0;
+  }
+
+  .beat-cell {
+    flex: 1;
+    min-width: 52px;
+    height: 38px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    transition: all 0.3s;
+  }
+
+  .beat-cell.chord {
+    background: var(--code);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+  }
+
+  .beat-cell.empty {
+    background: var(--code);
+    border: 1px solid var(--border);
+    color: var(--border);
+  }
+
+  .beat-cell.playing {
+    background: var(--accent);
+    color: var(--bg);
+    animation: pulse 0.5s ease;
+  }
+
+  .beat-numbers {
+    display: flex;
+    gap: 0.3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .beat-num {
+    flex: 1;
+    min-width: 52px;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+  }
+
+  /* Output comparison */
+  .output-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    font-size: 0.9rem;
+  }
+
+  .output-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--accent);
+    text-align: left;
+  }
+
+  .output-table td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: #c8c4bc;
+    vertical-align: top;
+  }
+
+  .output-table tr:hover td { background: var(--surface); }
+
+  .tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+  }
+
+  .tag-yes { background: rgba(126,184,200,0.15); color: var(--accent2); border: 1px solid rgba(126,184,200,0.3); }
+  .tag-no  { background: rgba(200,126,154,0.1);  color: var(--accent3); border: 1px solid rgba(200,126,154,0.2); }
+  .tag-pro { background: rgba(200,169,110,0.1);  color: var(--accent);  border: 1px solid rgba(200,169,110,0.3); }
+
+  /* Pipeline flow */
+  .pipeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 2.5rem 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .pipe-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.2rem 1.5rem;
+    text-align: center;
+    min-width: 130px;
+    transition: border-color 0.3s;
+    cursor: default;
+  }
+
+  .pipe-step:hover { border-color: var(--accent); }
+
+  .pipe-step .ps-icon { font-size: 1.5rem; margin-bottom: 0.4rem; display: block; }
+
+  .pipe-step .ps-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+
+  .pipe-step .ps-desc { font-size: 0.8rem; color: var(--muted); }
+
+  .pipe-arrow {
+    font-size: 1.2rem;
+    color: var(--accent);
+    padding: 0 0.3rem;
+    opacity: 0.5;
+  }
+
+  /* Terminal block */
+  .terminal {
+    background: #080810;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 1.5rem 2rem;
+    margin: 2rem 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 2;
+    overflow-x: auto;
+  }
+
+  .t-prompt { color: var(--accent); }
+  .t-cmd    { color: var(--text); }
+  .t-out    { color: var(--muted); }
+  .t-ok     { color: var(--accent2); }
+  .t-val    { color: var(--accent); }
+
+  /* Animate play button */
+  .play-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--accent);
+    border: none;
+    padding: 0.7rem 2rem;
+    cursor: pointer;
+    border-radius: 2px;
+    margin-top: 1rem;
+    transition: opacity 0.2s;
+  }
+
+  .play-btn:hover { opacity: 0.85; }
+
+  /* Competitor table */
+  .comp-wrap { overflow-x: auto; margin: 2rem 0; }
+
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+  }
+
+  .comp-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    color: var(--muted);
+  }
+
+  .comp-table th.ours {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: rgba(200,169,110,0.05);
+  }
+
+  .comp-table td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .comp-table td:first-child {
+    text-align: left;
+    font-size: 0.82rem;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+  }
+
+  .comp-table td.ours { background: rgba(200,169,110,0.04); }
+
+  .check { color: var(--accent2); font-size: 1rem; }
+  .cross { color: var(--accent3); font-size: 1rem; opacity: 0.7; }
+  .part  { color: var(--accent);  font-size: 0.75rem; }
+
+  /* Key/MIDI section */
+  .key-demo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  @media (max-width: 600px) { .key-demo { grid-template-columns: 1fr; } }
+
+  .key-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    border-radius: 2px;
+  }
+
+  .key-box h5 {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .confidence-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .conf-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text);
+    min-width: 80px;
+  }
+
+  .conf-track {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .conf-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+
+  .conf-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    min-width: 40px;
+    text-align: right;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 4rem 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  footer .big {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+    font-style: italic;
+    display: block;
+    margin: 1rem 0;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes scrollLine {
+    0%   { opacity: 1; transform: scaleY(1); }
+    100% { opacity: 0; transform: scaleY(0) translateY(20px); }
+  }
+
+  /* Fade in on scroll */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">Prometheus</span>
+  <ul class="nav-links">
+    <li><a onclick="scrollTo('concepts')">Concepts</a></li>
+    <li><a onclick="scrollTo('chords')">Chords</a></li>
+    <li><a onclick="scrollTo('beats')">Beats</a></li>
+    <li><a onclick="scrollTo('outputs')">Outputs</a></li>
+    <li><a onclick="scrollTo('compare')">vs Others</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <p class="hero-eyebrow">Music Intelligence Platform</p>
+  <h1>Hear it.<br><em>Understand</em> it.<br>Build with it.</h1>
+  <p class="hero-sub">A complete guide to what Prometheus does, why it matters, and how it outperforms every paid alternative on the market.</p>
+  <div class="scroll-hint">Scroll to explore</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SECTION 1: CORE CONCEPTS -->
+<section id="concepts">
+  <div class="reveal">
+    <span class="section-number">01 — Foundation</span>
+    <h2>What is music,<br><em>technically</em>?</h2>
+    <p class="lead">Before explaining what Prometheus does, it helps to understand what music actually consists of — because that's exactly what Prometheus extracts.</p>
+    <p>Any piece of recorded music is a raw audio waveform — millions of numbers representing air pressure over time. Hidden inside that waveform are structured musical objects: individual notes with pitches and durations, chords built from those notes, a rhythmic grid of beats and bars, and a tonal key that gives the whole piece its emotional character. Prometheus reads a raw audio file and outputs all of these as structured, actionable data.</p>
+  </div>
+
+  <div class="concept-grid reveal">
+    <div class="concept-card">
+      <span class="icon">🎵</span>
+      <h4>Notes</h4>
+      <p>A single sound with a specific pitch (how high or low) and duration. Middle C on a piano, a guitar string plucked at the 5th fret — these are notes. Prometheus detects every note played, including multiple simultaneous ones.</p>
+    </div>
+    <div class="concept-card">
+      <span class="icon">🎸</span>
+      <h4>Chords</h4>
+      <p>Three or more notes played together that create harmony. Em (E minor), Cmaj7, D7 — the building blocks of every song's emotional arc. Prometheus identifies them, names them, and places them in time.</p>
+    </div>
+    <div class="concept-card">
+      <span class="icon">🥁</span>
+      <h4>Beats & Bars</h4>
+      <p>The rhythmic pulse of music. A bar (or measure) groups beats — typically 4 per bar in pop music. Knowing "this chord lands on Bar 3, Beat 1" is what makes music synchronised and usable in production.</p>
+    </div>
+    <div class="concept-card">
+      <span class="icon">🔑</span>
+      <h4>Key</h4>
+      <p>The tonal centre of the song — the "home base" all the chords relate to. E minor, D major, A minor. Knowing the key is essential for transposing, remixing, or layering new instruments.</p>
+    </div>
+    <div class="concept-card">
+      <span class="icon">🎹</span>
+      <h4>MIDI</h4>
+      <p>Musical Instrument Digital Interface — a universal file format that encodes notes, timing, velocity, and instrument type. Every DAW (music production software) reads MIDI. It's the bridge between audio analysis and music production.</p>
+    </div>
+    <div class="concept-card">
+      <span class="icon">🏭</span>
+      <h4>DAW</h4>
+      <p>Digital Audio Workstation — software like Ableton, Logic Pro, FL Studio, or Cubase. Where music gets produced, mixed, and arranged. Prometheus outputs files that plug directly into any DAW without conversion.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 2: CHORD LEVELS -->
+<section id="chords">
+  <div class="reveal">
+    <span class="section-number">02 — Chord Intelligence</span>
+    <h2>Three levels of<br><em>chord detail</em></h2>
+    <p class="lead">Not everyone needs the same amount of information. A beginner guitarist needs simple triads. A jazz composer needs every extension. Prometheus adapts to both — automatically.</p>
+    <p>Prometheus detects the full complexity of every chord, then offers three output levels so the data can be calibrated to the audience or use case. No other tool that also exports MIDI offers this.</p>
+  </div>
+
+  <div class="chord-demo reveal">
+    <div class="chord-tabs">
+      <button class="chord-tab active" onclick="showLevel('easy')">Easy — Triads</button>
+      <button class="chord-tab" onclick="showLevel('medium')">Medium — 7ths</button>
+      <button class="chord-tab" onclick="showLevel('advanced')">Advanced — Full</button>
+    </div>
+
+    <div class="chord-content active" id="level-easy">
+      <p style="font-size:0.9rem; color:var(--muted); margin-bottom:1.5rem;">Basic three-note chords. Perfect for beginners, chord charts, and lyric sheets.</p>
+      <div class="chord-row">
+        <span class="chord-name">Em</span>
+        <div class="chord-notes">
+          <span class="note-pill">E</span><span class="note-pill">G</span><span class="note-pill">B</span>
+        </div>
+        <span class="chord-desc">E minor triad</span>
+      </div>
+      <div class="chord-row">
+        <span class="chord-name">C</span>
+        <div class="chord-notes">
+          <span class="note-pill">C</span><span class="note-pill">E</span><span class="note-pill">G</span>
+        </div>
+        <span class="chord-desc">C major triad</span>
+      </div>
+      <div class="chord-row">
+        <span class="chord-name">D</span>
+        <div class="chord-notes">
+          <span class="note-pill">D</span><span class="note-pill">F♯</span><span class="note-pill">A</span>
+        </div>
+        <span class="chord-desc">D major triad</span>
+      </div>
+      <div class="chord-row">
+        <span class="chord-name">G</span>
+        <div class="chord-notes">
+          <span class="note-pill">G</span><span class="note-pill">B</span><span class="note-pill">D</span>
+        </div>
+        <span class="chord-desc">G major triad</span>
+      </div>
+    </div>
+
+    <div class="chord-content" id="level-medium">
+      <p style="font-size:0.9rem; color:var(--muted); margin-bottom:1.5rem;">Four-note chords with 7th extensions. For intermediate players and richer harmony.</p>
+      <div class="chord-row">
+        <span class="chord-name">Em7</span>
+        <div class="chord-notes">
+          <span class="note-pill">E</span><span class="note-pill">G</span><span class="note-pill">B</span><span class="note-pill">D</span>
+        </div>
+        <span class="chord-desc">E minor 7th</span>
+      </div>
+      <div class="chord-row">
+        <span class="chord-name">Cmaj7</span>
+        <div class="chord-notes">
+          <span class="note-pill">C</span><span class="note-pill">E</span><span class="note-pill">G</span><span class="note-pill">B</span>
+        </div>
+        <span class="chord-desc">C major 7th</span>
+      </div>
+      <div class="chord-row">
+        <span class="chord-name">D7</span>
+        <div class="chord-notes">
+          <span class="note-pill">D</span><span class="note-pill">F♯</span><span class="note-pill">A</span><span class="note-pill">C</span>
+        </div>
+        <span class="chord-desc">D dominant 7th</span>
+      </div>
+      <div class="chord-row">
+        <span class="chord-name">Gmaj7</span>
+        <div class="chord-notes">
+          <span class="note-pill">G</span><span class="note-pill">B</span><span class="note-pill">D</span><span class="note-pill">F♯</span>
+        </div>
+        <span class="chord-desc">G major 7th</span>
+      </div>
+    </div>
+
+    <div class="chord-content" id="level-advanced">
+      <p style="font-size:0.9rem; color:var(--muted); margin-bottom:1.5rem;">Full extended harmony including 9ths, 11ths, augmented, and Jazz voicings. Complete picture.</p>
+      <div class="chord-row">
+        <span class="chord-name">Cadd9</span>
+        <div class="chord-notes">
+          <span class="note-pill">C</span><span class="note-pill">E</span><span class="note-pill">G</span><span class="note-pill">D</span>
+        </div>
+        <span class="chord-desc">C add 9th</span>
+      </div>
+      <div class="chord-row">
+        <span class="chord-name">Caug</span>
+        <div class="chord-notes">
+          <span class="note-pill">C</span><span class="note-pill">E</span><span class="note-pill">G♯</span>
+        </div>
+        <span class="chord-desc">C augmented</span>
+      </div>
+      <div class="chord-row">
+        <span class="chord-name">Esus2</span>
+        <div class="chord-notes">
+          <span class="note-pill">E</span><span class="note-pill">F♯</span><span class="note-pill">B</span>
+        </div>
+        <span class="chord-desc">E suspended 2nd</span>
+      </div>
+      <div class="chord-row">
+        <span class="chord-name">Am9</span>
+        <div class="chord-notes">
+          <span class="note-pill">A</span><span class="note-pill">C</span><span class="note-pill">E</span><span class="note-pill">G</span><span class="note-pill">B</span>
+        </div>
+        <span class="chord-desc">A minor 9th (Jazz)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="reveal">
+    <h3>Key Detection</h3>
+    <p>Prometheus uses the Krumhansl-Schmuckler algorithm — a musicologically validated model based on how human listeners perceive tonal centres — to identify the key of any song with a confidence score.</p>
+  </div>
+
+  <div class="key-demo reveal">
+    <div class="key-box">
+      <h5>Guitar Test — E minor</h5>
+      <div class="confidence-bar">
+        <span class="conf-label">E minor</span>
+        <div class="conf-track"><div class="conf-fill" style="width:90.23%"></div></div>
+        <span class="conf-pct">90.2%</span>
+      </div>
+      <div class="confidence-bar">
+        <span class="conf-label">G major</span>
+        <div class="conf-track"><div class="conf-fill" style="width:61%;background:var(--border)"></div></div>
+        <span class="conf-pct">61.0%</span>
+      </div>
+      <div class="confidence-bar">
+        <span class="conf-label">B minor</span>
+        <div class="conf-track"><div class="conf-fill" style="width:38%;background:var(--border)"></div></div>
+        <span class="conf-pct">38.0%</span>
+      </div>
+    </div>
+    <div class="key-box">
+      <h5>Piano Test — D major</h5>
+      <div class="confidence-bar">
+        <span class="conf-label">D major</span>
+        <div class="conf-track"><div class="conf-fill" style="width:90.8%"></div></div>
+        <span class="conf-pct">90.8%</span>
+      </div>
+      <div class="confidence-bar">
+        <span class="conf-label">A major</span>
+        <div class="conf-track"><div class="conf-fill" style="width:55%;background:var(--border)"></div></div>
+        <span class="conf-pct">55.0%</span>
+      </div>
+      <div class="confidence-bar">
+        <span class="conf-label">F♯ minor</span>
+        <div class="conf-track"><div class="conf-fill" style="width:42%;background:var(--border)"></div></div>
+        <span class="conf-pct">42.0%</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 3: BEATS -->
+<section id="beats">
+  <div class="reveal">
+    <span class="section-number">03 — Rhythmic Grid</span>
+    <h2>Every chord placed on<br><em>the exact beat</em></h2>
+    <p class="lead">Knowing a chord's name is one thing. Knowing it lands on Bar 2, Beat 3 at 136 BPM is what makes it production-ready.</p>
+    <p>Prometheus runs librosa's beat tracker to compute the full rhythmic grid of the song — BPM, beats, and bars — then places every detected chord precisely on that grid. This is what "bars and beats sync" means: a guitarist, producer, or arranger can immediately see where each chord falls without listening to the song.</p>
+  </div>
+
+  <div class="beat-grid reveal" id="beatgrid">
+    <div style="margin-bottom:1rem;">
+      <span style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.15em;color:var(--accent);text-transform:uppercase;">Guitar Test — 136 BPM, 4/4</span>
+    </div>
+    <div class="beat-numbers">
+      <div class="beat-num" style="width:60px;flex:none;"></div>
+      <div class="beat-num">B1</div>
+      <div class="beat-num">B2</div>
+      <div class="beat-num">B3</div>
+      <div class="beat-num">B4</div>
+    </div>
+    <div class="beat-row">
+      <span class="beat-label">Bar 1</span>
+      <div class="beat-cell chord" id="b1">Em</div>
+      <div class="beat-cell empty">—</div>
+      <div class="beat-cell chord">Esus2</div>
+      <div class="beat-cell empty">—</div>
+    </div>
+    <div class="beat-row">
+      <span class="beat-label">Bar 2</span>
+      <div class="beat-cell chord">Em</div>
+      <div class="beat-cell empty">—</div>
+      <div class="beat-cell empty">—</div>
+      <div class="beat-cell chord">Esus2</div>
+    </div>
+    <div class="beat-row">
+      <span class="beat-label">Bar 7</span>
+      <div class="beat-cell empty">—</div>
+      <div class="beat-cell chord">A</div>
+      <div class="beat-cell empty">—</div>
+      <div class="beat-cell chord">C</div>
+    </div>
+    <div class="beat-row">
+      <span class="beat-label">Bar 12</span>
+      <div class="beat-cell empty">—</div>
+      <div class="beat-cell empty">—</div>
+      <div class="beat-cell empty">—</div>
+      <div class="beat-cell chord">D</div>
+    </div>
+    <button class="play-btn" onclick="animateBeats()">▶ Animate Playback</button>
+  </div>
+
+  <div class="reveal" style="margin-top:2rem;">
+    <h3>Transposition</h3>
+    <p>Every detected chord can be shifted up or down any number of semitones — instantly changing the key of the entire song. A guitarist who plays in open E but needs the song in G? <code style="font-family:'DM Mono',monospace;font-size:0.85rem;background:var(--code);padding:0.1rem 0.4rem;border-radius:2px;color:var(--accent2);">--transpose +3</code>. A vocalist whose range sits a fifth higher? <code style="font-family:'DM Mono',monospace;font-size:0.85rem;background:var(--code);padding:0.1rem 0.4rem;border-radius:2px;color:var(--accent2);">--transpose +7</code>. The MIDI file shifts with it.</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 4: OUTPUTS -->
+<section id="outputs">
+  <div class="reveal">
+    <span class="section-number">04 — What Prometheus Produces</span>
+    <h2>From audio to<br><em>production assets</em></h2>
+    <p class="lead">One command. One audio file. Six structured output files ready for any production workflow.</p>
+  </div>
+
+  <div class="pipeline reveal">
+    <div class="pipe-step">
+      <span class="ps-icon">🎵</span>
+      <span class="ps-label">Input</span>
+      <span class="ps-desc">MP3 / WAV / FLAC</span>
+    </div>
+    <span class="pipe-arrow">→</span>
+    <div class="pipe-step">
+      <span class="ps-icon">🧠</span>
+      <span class="ps-label">Analysis</span>
+      <span class="ps-desc">AI note & chord detection</span>
+    </div>
+    <span class="pipe-arrow">→</span>
+    <div class="pipe-step">
+      <span class="ps-icon">📊</span>
+      <span class="ps-label">Structure</span>
+      <span class="ps-desc">Key, BPM, bars, beats</span>
+    </div>
+    <span class="pipe-arrow">→</span>
+    <div class="pipe-step">
+      <span class="ps-icon">📦</span>
+      <span class="ps-label">Output</span>
+      <span class="ps-desc">MIDI + JSON files</span>
+    </div>
+  </div>
+
+  <table class="output-table reveal">
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Contains</th>
+        <th>Use Case</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code style="font-family:'DM Mono',monospace;color:var(--accent2);">notes.mid</code></td>
+        <td>All detected notes, correct instrument MIDI program, velocity max=127, TPB=480</td>
+        <td>Import directly into any DAW track. Plays back as the correct instrument.</td>
+      </tr>
+      <tr>
+        <td><code style="font-family:'DM Mono',monospace;color:var(--accent2);">chords.mid</code></td>
+        <td>Beat-aligned chord blocks, correct instrument program</td>
+        <td>Chord track in DAW. Every chord on the right beat.</td>
+      </tr>
+      <tr>
+        <td><code style="font-family:'DM Mono',monospace;color:var(--accent2);">analysis.json</code></td>
+        <td>Raw structured data — key, all notes with confidence, all chords with timing</td>
+        <td>Feed into any app, website, or further processing pipeline.</td>
+      </tr>
+      <tr>
+        <td><code style="font-family:'DM Mono',monospace;color:var(--accent2);">analysis_enhanced.json</code></td>
+        <td>Bar/beat positions, difficulty level applied, BPM, time signature</td>
+        <td>Display chord sheets, build apps, sync to video.</td>
+      </tr>
+      <tr>
+        <td><code style="font-family:'DM Mono',monospace;color:var(--accent2);">chords_transposed.mid</code></td>
+        <td>Chord MIDI shifted by N semitones</td>
+        <td>Instant key change without re-analysing the audio.</td>
+      </tr>
+      <tr>
+        <td><code style="font-family:'DM Mono',monospace;color:var(--accent2);">notes_polyphonic_raw.mid</code></td>
+        <td>All notes before confidence filtering</td>
+        <td>Advanced users who want unfiltered detection data.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="terminal reveal">
+    <div><span class="t-prompt">$</span> <span class="t-cmd">python main.py song.mp3 --instrument guitar --level easy --transpose +2</span></div>
+    <div><span class="t-out">Loading: song.mp3</span></div>
+    <div><span class="t-out">  Instrument : guitar — Acoustic Guitar (Steel) (program 25)</span></div>
+    <div><span class="t-out">  -> Duration: 27.03s | Sample Rate: 22050Hz</span></div>
+    <div><span class="t-out">Detecting key...</span></div>
+    <div><span class="t-out">  -> Key: </span><span class="t-val">E minor</span><span class="t-out"> (confidence: 0.9023)</span></div>
+    <div><span class="t-out">Extracting notes...</span></div>
+    <div><span class="t-out">  -> 232 detected | threshold=0.412 (auto) | 78 filtered | </span><span class="t-ok">154 kept</span></div>
+    <div><span class="t-out">Extracting chords...</span></div>
+    <div><span class="t-out">  -> Beat grid: </span><span class="t-val">136.0 BPM</span><span class="t-out">, 64 beats detected</span></div>
+    <div><span class="t-out">  -> </span><span class="t-ok">18 chord segments</span><span class="t-out"> found</span></div>
+    <div><span class="t-out">  -> notes.mid saved (154 notes, TPB=480, vel 66-127, program=25)</span></div>
+    <div><span class="t-out">  -> chords.mid saved (18 chords, TPB=480, vel 92-127, program=25)</span></div>
+    <div><span class="t-out">  -> Transposed: </span><span class="t-val">F♯ minor</span><span class="t-out"> (+2 semitones)</span></div>
+    <div><span class="t-out">  -> Level: </span><span class="t-val">easy</span><span class="t-out"> (first chord: Bar 1 Beat 1)</span></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 5: COMPARISON -->
+<section id="compare">
+  <div class="reveal">
+    <span class="section-number">05 — Market Position</span>
+    <h2>How Prometheus<br><em>compares</em></h2>
+    <p class="lead">Every paid tool in this space does one or two things well. Prometheus is the only tool that does all of them — and exports production-ready MIDI files.</p>
+  </div>
+
+  <div class="comp-wrap reveal">
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th style="text-align:left;">Feature</th>
+          <th class="ours">Prometheus</th>
+          <th>Chordify</th>
+          <th>Moises</th>
+          <th>AnthemScore</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Chord detection</td>
+          <td class="ours"><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+          <td>3 difficulty levels</td>
+          <td class="ours"><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+          <td>Bars & beats sync</td>
+          <td class="ours"><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+          <td>MIDI export</td>
+          <td class="ours"><span class="check">✓</span></td>
+          <td><span class="part">Chords only</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Polyphonic note MIDI</td>
+          <td class="ours"><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Correct instrument program</td>
+          <td class="ours"><span class="check">✓</span> 17 instruments</td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="part">Limited</span></td>
+        </tr>
+        <tr>
+          <td>Key detection + confidence</td>
+          <td class="ours"><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Transposition</td>
+          <td class="ours"><span class="check">✓</span> Any key</td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Custom time signatures</td>
+          <td class="ours"><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+          <td>Stem separation</td>
+          <td class="ours"><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="check">✓</span> Best-in-class</td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+          <td>Fully offline / local</td>
+          <td class="ours"><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Batch processing</td>
+          <td class="ours"><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+          <td>Structured JSON output</td>
+          <td class="ours"><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+          <td>Pricing</td>
+          <td class="ours" style="color:var(--accent);">Self-hosted</td>
+          <td>$3–7/mo</td>
+          <td>$3–18+/mo</td>
+          <td>£34 one-time</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="reveal" style="margin-top:3rem;">
+    <p class="lead">The gap that matters most: Moises matches Prometheus on chord levels and bars/beats — but has zero MIDI export. AnthemScore exports MIDI — but has no chord detection and no beat sync. Prometheus is the only tool that does both, for any instrument, offline, with no subscription.</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<footer>
+  <p>Music Intelligence Platform</p>
+  <span class="big">Prometheus</span>
+  <p>From raw audio to production-ready assets — automatically.</p>
+</footer>
+
+<script>
+  // Scroll navigation
+  function scrollTo(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // Chord level tabs
+  function showLevel(level) {
+    document.querySelectorAll('.chord-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.chord-content').forEach(c => c.classList.remove('active'));
+    document.querySelector(`[onclick="showLevel('${level}')"]`).classList.add('active');
+    document.getElementById(`level-${level}`).classList.add('active');
+  }
+
+  // Beat animation
+  function animateBeats() {
+    const cells = document.querySelectorAll('.beat-cell.chord');
+    let i = 0;
+    cells.forEach(c => c.classList.remove('playing'));
+    const interval = setInterval(() => {
+      if (i > 0) cells[i-1].classList.remove('playing');
+      if (i >= cells.length) { clearInterval(interval); return; }
+      cells[i].classList.add('playing');
+      i++;
+    }, 380);
+  }
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
